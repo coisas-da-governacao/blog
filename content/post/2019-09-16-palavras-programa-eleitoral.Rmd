@@ -1,0 +1,205 @@
+---
+title: 'Programas eleitorais e atalhos'
+author: Manuela Almeida
+date: '2019-09-16'
+slug: palavras-programas-eleitorais
+categories: [legislativas]
+tags: []
+---
+
+As legislativas portuguesas estão a aproximar-se e os sete partidos com assento parlamentar já disponibilizaram os seus programas eleitorais. Com centenas de páginas por programa, conseguiremos encontrar alguma informação relevante seguindo por um atalho (i.e., não os lendo por inteiro)? A nossa proposta é então analisar a frequência das palavras de cada programa e, assim, tentar compreender a mensagem genérica de cada um dos partidos. 
+
+_Nota:_ palavras comuns da língua portuguesa ([_stop words_](https://en.wikipedia.org/wiki/Stop_words)) e que não adicionam especial significado tais como "a", "os", "eles", foram removidas da análise. A lista completa pode ser consultada [aqui](http://snowball.tartarus.org/algorithms/portuguese/stop.txt).
+
+
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+load("first-post/programas_tdm.RData")
+most_frequent_words <- tm::findMostFreqTerms(programas_tdm, n = 10L)
+
+seven_parties <- bind_rows(most_frequent_words$ps %>% stack() %>% mutate(party = "PS"),
+                            most_frequent_words$psd %>% stack() %>% mutate(party = "PSD"),
+                            most_frequent_words$be %>% stack() %>% mutate(party = "BE"),
+                            most_frequent_words$cds %>% stack() %>% mutate(party = "CDS"),
+                            most_frequent_words$pcp %>% stack() %>% mutate(party = "PCP"),
+                            most_frequent_words$verdes %>% stack() %>% mutate(party = "Os Verdes"),
+                            most_frequent_words$pan %>% stack() %>% mutate(party = "PAN"))
+
+histogram_words <- function(data, title = "", xlab = "", ylab = ""){
+  ggplot(data) + 
+    geom_histogram(aes(x = reorder(ind, values), y = values), stat = "identity", alpha = 0.7, width = 0.8) +
+    xlab(xlab) +
+    ylab(ylab) + 
+    coord_flip() +
+    ggtitle(title) +
+    ggthemes::theme_hc()
+}
+```
+
+# Contagem simples
+
+A primeira abordagem consiste simplesmente em contar cada palavra e analisar o _top_ 10 para cada um dos partidos.
+
+## PS
+```{r}
+histogram_words(seven_parties %>% filter(party == "PS"), title = "10 palavras mais mencionadas pelo PS", ylab = "Frequência")
+```
+
+## PSD
+```{r}
+histogram_words(seven_parties %>% filter(party == "PSD"), title = "10 palavras mais mencionadas pelo PSD", ylab = "Frequência")
+```
+
+## BE
+```{r}
+histogram_words(seven_parties %>% filter(party == "BE"), title = "10 palavras mais mencionadas pelo BE", ylab = "Frequência")
+```
+
+## CDS
+```{r}
+histogram_words(seven_parties %>% filter(party == "CDS"), title = "10 palavras mais mencionadas pelo CDS", ylab = "Frequência")
+```
+
+## PCP
+```{r}
+histogram_words(seven_parties %>% filter(party == "PCP"), title = "10 palavras mais mencionadas pelo PCP", ylab = "Frequência")
+```
+
+## Os Verdes
+```{r}
+histogram_words(seven_parties %>% filter(party == "Os Verdes"), title = "10 palavras mais mencionadas pelo partido Os Verdes", ylab = "Frequência")
+```
+
+## PAN
+```{r}
+histogram_words(seven_parties %>% filter(party == "PAN"), title = "10 palavras mais mencionadas pelo PAN", ylab = "Frequência")
+```
+
+```{r}
+words_and_parties_distinct <- seven_parties %>% 
+  group_by(ind) %>% 
+  summarise(n_parties = n_distinct(party))
+```
+
+Com esta abordagem, podemos concluir que existem várias palavras comuns entre os _top_ 10 dos diferentes programas eleitorais. Por exemplo, as palavras "portugal", "estado", "social" e "nacional" são partilhadas por cinco dos sete programas analisados.
+
+Se observarmos as várias distribuições, percebemos que em alguns partidos, como o PSD, as frequências das diferentes palavras não têm valores muito díspares. Por outro lado, em casos como o CDS, a diferença é bastante maior entre a palavra mais frequente ("estado") e a que se encontra em segundo lugar ("empresas"). Outro exemplo é o caso do partido "Os Verdes", em que a palavra mais destacada é "saúde".
+
+
+```{r}
+rank_first_word <- seven_parties %>% 
+  group_by(party) %>% 
+  summarise(ratio_between_first_and_second = round(abs(head(diff(values), 1)/max(values)*100)))
+# Analisar a diferença entre o primeiro e o segundo ligar (parece que "estado" no CDS é mais preponderante)
+```
+
+
+# Contagem ponderada
+
+Tendo em consideração apenas uma contagem simples, não conseguimos extrair quais as palavras mais "singulares" em cada um dos programas eleitorais. Dito de outra forma, para tentar compreender mais aprofundadamente cada partido, será necessário encontrar as palavras que são mais frequentes em cada programa eleitoral mas que não o são nos restantes. Assim, este rácio pode ser calculado através da fórmula [tf-idf](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) (_term frequency–inverse document frequency_). 
+
+_Nota:_ Usaremos a palavra "importância" para caracterizar os valores dados pelo rácio tf-idf. Mais concretamente, consideraremos que palavras com valores mais altos são mais importantes e palavras com valores mais baixos como menos importantes. A escolha do adjectivo "importante" é subjectiva, podendo haver outras formas de cálculo de importância, dependendo do contexto.
+
+```{r}
+tf_idf <- tm::weightTfIdf(programas_tdm)
+
+most_frequent_words_tf_idf <- tm::findMostFreqTerms(tf_idf, n = 10L)
+
+seven_parties_tf_idf <- bind_rows(most_frequent_words_tf_idf$ps %>% stack() %>% mutate(party = "PS"),
+                            most_frequent_words_tf_idf$psd %>% stack() %>% mutate(party = "PSD"),
+                            most_frequent_words_tf_idf$be %>% stack() %>% mutate(party = "BE"),
+                            most_frequent_words_tf_idf$cds %>% stack() %>% mutate(party = "CDS"),
+                            most_frequent_words_tf_idf$pcp %>% stack() %>% mutate(party = "PCP"),
+                            most_frequent_words_tf_idf$verdes %>% stack() %>% mutate(party = "Os Verdes"),
+                            most_frequent_words_tf_idf$pan %>% stack() %>% mutate(party = "PAN"))
+
+load("first-post/programas_df.RData")
+```
+
+## PS
+```{r}
+histogram_words(seven_parties_tf_idf %>% filter(party == "PS"), title = "10 palavras mais importantes para o PS", ylab = "tf-idf")
+```
+
+```{r}
+words_ps <- strsplit( programas_df_renamed %>% filter(doc_id == "ps") %>% pull(text), " ") %>% 
+  unlist() 
+
+ira_indices <- words_ps %>% 
+  grep(pattern = "irá")
+
+words_after_ira <- words_ps[ira_indices+1]
+```
+
+A palavra mais importante no programa do Partido Socialista é "irá". Em termos de linguagem, a utilização desta palavra denota assertividade e confiança no modo como apresentam as diferentes medidas e propostas. Se olharmos para alguns exemplos de palavras que sucedem "irá" encontramos "irá promover", "irá prosseguir" e "irá impedir".
+
+## PSD
+```{r}
+histogram_words(seven_parties_tf_idf %>% filter(party == "PSD"), title = "10 palavras mais importantes para o PSD", ylab = "tf-idf")
+```
+
+A palavra (ou sigla) mais importante é, destacamente, "psd". "inadiáveis" e "ação" são palavras que sugerem urgência. A palavra
+"curriculum" remete-nos para a bandeira da educação.
+
+
+## BE
+```{r}
+histogram_words(seven_parties_tf_idf %>% filter(party == "BE"), title = "10 palavras mais importantes para o BE", ylab = "tf-idf")
+```
+
+```{r}
+parties_with_feminine_genre <- programas_df_renamed %>% group_by(doc_id) %>% summarise(female_workers_and_teachers = grepl(pattern = "trabalhadoras | professoras", text)) 
+```
+
+Em relação ao Bloco de Esquerda, encontramos palavras tais como "trabalhadoras" e "professoras". É de notar que 
+só nos programas eleitorais do Bloco de Esquerda, Livre e PAN é que encontramos estas palavras no género feminino.
+Outras causas importantes para o BE podem ser sumarisadas pelas palavras "uber" (contra modelos de negócios de empresas multinacionais) 
+e "racializadas" (combate ao racismo).
+_Nota:_ a sigla "aid" refere-se a Ativos por Impostos Diferidos.
+
+## CDS
+```{r}
+histogram_words(seven_parties_tf_idf %>% filter(party == "CDS"), title = "10 palavras mais importantes para o CDS", ylab = "tf-idf")
+```
+
+Na lista de palavras mais importantes para o CDS, encontramos verbos como "criaremos", "queremos", "reforçaremos" e também "vencer".
+É assim dada ênfase a "nós" e a um esforço conjunto (por oposição à palavra "irá" encontrada no _top_ do PS). A palavra mais importante
+é "prontos" que faz parte do nome de um capítudo do partido: "prontos para vencer num mundo global".
+
+## PCP
+```{r}
+histogram_words(seven_parties_tf_idf %>% filter(party == "PCP"), title = "10 palavras mais importantes para o PCP", ylab = "tf-idf")
+```
+
+O Partido Comunista Português é o único partido em que no _top 10_ de palavras mais importantes encontramos a sigla de outro partido (neste caso, "cds"). 
+Outras palavras mais relevantes são "patriótica", "protecção", "elevação" e "social". Estas palavras estão de acordo com o 
+discurso que normalmente associamos a este partido.
+
+## Os Verdes
+```{r}
+histogram_words(seven_parties_tf_idf %>% filter(party == "Os Verdes"), title = "10 palavras mais importantes para Os Verdes", ylab = "tf-idf")
+```
+
+A sigla mais importante no programa eleitoral do partido Os Verdes é "cdu" da sua coligação com o Partido Comunista Português. 
+"plástico", "transgénicos" e "lgbti" são outras das palavras mais importantes denotando ênfase nas áreas ambientais e dos direitos
+LGBTI+. De referir também que "podes" é outra das palavra que podemos encontrar neste _top_, fazendo assim uma interpelação 
+directa ao leitor de uma forma informal.
+
+## PAN
+```{r}
+histogram_words(seven_parties_tf_idf %>% filter(party == "PAN"), title = "10 palavras mais importantes para o PAN", ylab = "tf-idf")
+```
+
+Para o PAN, "protecção", "animais" (e "animal"), "espectáculos" e "lgbti+" são das palavras com mais importância no seu programa eleitoral.
+São também palavras que nos remetem para as principais causas defendidas por este partido: protecção animal e direitos LGBTI+.
+
+De uma forma geral, aquilo que nos é dado por esta contagem ponderada aplicada sobre os programas eleitorais resume-se a um conjunto de palavras que descrevem, sumariariamente, aquilo que distingue cada um dos partidos. 
+
+Assim, para uma melhor compreensão das medidas e objectivos eleitorais de cada um destes partidos, outros atalhos (provavelmente mais sinuosos) serão necessários.
+
+_Nota final:_ No pré processamento dos documentos _.pdf_ de cada um dos programas eleitorais, várias decisões foram tomadas (tais como remover os algarismos e toda a pontuação). Qualquer tipo de pré processamento de texto influencia, naturalmente, o resultado das análise subsequentes. Assim, um _post_ mais detalhado sobre decisões tomadas e possíveis melhorias será elaborado no futuro. Temas como "lematização" de palavras serão também referidos. Todo o código para a análise do presente _post_ pode ser encontrado no [GitHub](https://github.com/coisas-da-governacao/blog).
