@@ -103,7 +103,7 @@ rank_first_word <- seven_parties %>%
 
 Tendo em consideração apenas uma contagem simples, não conseguimos extrair quais as palavras mais "singulares" em cada um dos programas eleitorais. Dito de outra forma, para tentar compreender mais aprofundadamente cada partido, será necessário encontrar as palavras que são mais frequentes em cada programa eleitoral mas que não o são nos restantes. Assim, este rácio pode ser calculado através da fórmula [tf-idf](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) (_term frequency–inverse document frequency_). 
 
-_Nota:_ Usaremos a palavra "importância" para caracterizar os valores dados pelo rácio tf-idf. Mais concretamente, consideraremos que palavras com valores mais altos são mais importantes e palavras com valores mais baixos como menos importantes. A escolha da palavra "importante" é subjectiva, podendo haver outras formas de cálculo de importância, dependendo do contexto.
+_Nota:_ Usaremos a palavra "importância" para caracterizar os valores dados pelo rácio tf-idf. Mais concretamente, consideraremos que palavras com valores mais altos são mais importantes e palavras com valores mais baixos como menos importantes. A escolha do adjectivo "importante" é subjectiva, podendo haver outras formas de cálculo de importância, dependendo do contexto.
 
 ```{r}
 tf_idf <- tm::weightTfIdf(programas_tdm)
@@ -136,7 +136,7 @@ ira_indices <- words_ps %>%
 words_after_ira <- words_ps[ira_indices+1]
 ```
 
-A palavra mais importante no programa do Partido Socialista é "irá". Em termos de linguagem, a utilização desta palavra denota assertividade e confiança no modo como apresentam as diferntes medidas e propostas. Se olharmos para alguns exemplos de palavras que sucedem "irá" encontramos "irá promover", "irá prosseguir" e "irá impedir".
+A palavra mais importante no programa do Partido Socialista é "irá". Em termos de linguagem, a utilização desta palavra denota assertividade e confiança no modo como apresentam as diferentes medidas e propostas. Se olharmos para alguns exemplos de palavras que sucedem "irá" encontramos "irá promover", "irá prosseguir" e "irá impedir".
 
 ## PSD
 ```{r}
@@ -187,8 +187,8 @@ histogram_words(seven_parties_tf_idf %>% filter(party == "Os Verdes"), title = "
 
 A sigla mais importante no programa eleitoral do partido Os Verdes é "cdu" da sua coligação com o Partido Comunista Português. 
 "plástico", "transgénicos" e "lgbti" são outras das palavras mais importantes denotando ênfase nas áreas ambientais e dos direitos
-LGBTI+. De referir também que "podes" é outra das palavra que podemos encontrar neste _top_, de onde podemos perceber uma interpelação 
-directa ao leitor de uma forma mais informal.
+LGBTI+. De referir também que "podes" é outra das palavra que podemos encontrar neste _top_, fazendo assim uma interpelação 
+directa ao leitor de uma forma informal.
 
 ## PAN
 ```{r}
