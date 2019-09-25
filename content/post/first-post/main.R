@@ -20,7 +20,9 @@ corpus <- tm::VCorpus(source) %>%
 
 programas_tdm <- tm::TermDocumentMatrix(corpus)
 
-save(programas_df_renamed, file = "content/post/first-post/programas_df.RData")
-save(programas_tdm, file = "content/post/first-post/programas_tdm.RData")
+#save(programas_df_renamed, file = "content/post/first-post/programas_df.RData")
+#save(programas_tdm, file = "content/post/first-post/programas_tdm.RData")
 
+save(programas_df_renamed, file = "content/post/second-post/programas_df_updated.RData")
+save(programas_tdm, file = "content/post/second-post/programas_tdm_updated.RData")
 

@@ -1,0 +1,171 @@
+---
+title: 'A rede social dos programas eleitorias'
+author: [Manuela Almeida, Susana Quartin]
+date: '2019-09-25'
+slug: rede-social-partidos
+categories: [legislativas]
+tags: [legislativas, redes sociais]
+---
+
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+Que situações levam um partido a referenciar outro no seu programa eleitoral? Com que frequência isso acontece nos programas para as legislativas que se aproximam? Para tentar responder a estas perguntas, construímos uma rede social em forma de [grafo](https://pt.wikipedia.org/wiki/Teoria_dos_grafos). Mais concretamente, nesta representação:
+
+* Cada nó (ou ponto) representa um diferente partido.
+* Cada aresta (ou seta) representa a existência de pelo menos uma referência a outro partido.
+* A direcção da seta - por exemplo, BE -> CDS - indica que o programa eleitoral do BE referencia o partido CDS.
+
+Instruções: o grafo abaixo é interactivo, sendo possível passar o rato sobre as arestas para ver o número de referências, bem como clicar ou arrastar os nós para uma melhor visualização das ligações.
+
+```{r}
+load("second-post/programas_df_updated.RData")
+
+library(dplyr)
+
+
+ps <- c("\\bps\\b", "\\bpartido socialista\\b", "\\batual governo\\b", "\\bactual governo\\b")
+psd <- c("\\bpsd\\b", "\\bpartido social democrático\\b")
+cds <- c("\\bcds\\b", "\\bcds-pp\\b", "\\bpartido do centro democrático social\\b")
+be <- c("\\bbe\\b", "\\bbloco esquerda\\b")
+pan <- c("\\bpan\\b", "\\bpessoas animais natureza\\b")
+pcp <- c("\\bpcp\\b", "\\bpartido comunista português\\b", "\\bpartido comunista\\b")
+os_verdes <- c("\\bpev\\b", "\\bpartido ecologista verdes\\b")
+
+occurrences <- function(data){
+  data %>% 
+    mutate(ps = sum(stringr::str_count(text, ps)),
+           psd = sum(stringr::str_count(text, psd)),
+           cds = sum(stringr::str_count(text, cds)),
+           be = sum(stringr::str_count(text, be)),
+           pan = sum(stringr::str_count(text, pan)),
+           pcp = sum(stringr::str_count(text, pcp)),
+           os_verdes = sum(stringr::str_count(text, os_verdes))
+    ) %>% 
+    select(-text)
+}
+
+relations <- purrr::map_df(c("ps", "psd", "cds", "be", "pan", "pcp", "verdes"), function(x) {occurrences(programas_df_renamed %>% filter(doc_id == x))}) %>% select(-doc_id) %>% as.matrix() 
+diag(relations) <- 0
+relations[1, c("pan")] <- 0 #error: pan-europeu
+relations[2, c("be")] <- 0 #error: ben- {paragraph} efícios
+relations[3, c("be")] <- 0 #error: ben- {paragraph} efícios
+colnames(relations) <- c("PS", "PSD", "CDS", "BE", "PAN", "PCP", "Os Verdes")
+
+library(igraph)
+library(visNetwork)
+
+set.seed(3)
+g <- graph_from_adjacency_matrix(relations, mode = "directed", weighted = TRUE)
+
+E(g)$title <- E(g)$weight %>% as.character()
+
+V(g)$title <- V(g)$name
+```
+
+```{r fig.align="center"}
+g %>% 
+  visIgraph() %>% 
+  visIgraphLayout(layout = "layout_as_star") %>%
+  visNodes(
+    size = 8,
+    shape = "dot",
+     color = list(
+       background = "#077a71",
+       border = "#013848",
+       highlight = "#e78119",
+       hover = list(
+         background = "#077a71",
+         border = "#013848"
+       )
+     ),
+    shadow = list(enabled = TRUE, size = 10)
+  ) %>%
+  visEdges(
+    shadow = FALSE,
+    color = list(color = "#077a71", highlight = "#d40a47"), 
+    smooth = list(enabled = TRUE)
+  ) %>%
+  visOptions(highlightNearest = list(enabled = T, degree = 0.5, hover = T), 
+             nodesIdSelection = list(enabled = TRUE, main = "Seleccione o Partido")
+             ) %>% 
+  visInteraction(zoomView = FALSE) %>% 
+  visLayout(randomSeed = 6)
+```
+
+# PAN
+
+<center>
+![image](/img/pan-graph.jpeg){width=350px}
+</center>
+
+Com esta visualização, podemos verificar que o PAN é o único partido político cujo programa eleitoral não referencia nem é referenciado por nenhum outro. Assim, o nó que o representa está isolado.
+
+# PS 
+
+<center>
+![image](/img/ps-graph.jpeg){width=350px}
+</center>
+
+Em relação ao PS, _todos_ os programas eleitorais (excepto PAN) o referenciam. No sentido oposto, o programa eleitoral do PS não faz qualquer referência a outros partidos.
+
+
+# PSD 
+
+<center>
+![image](/img/psd-graph.jpeg){width=350px}
+</center>
+
+Se olharmos para o PSD, o único partido que o seu programa eleitoral menciona é o PS. Duas destas referências são relativas ao [acordo de descentralização](https://www.jornaldenegocios.pt/economia/autarquias/detalhe/projecto-pspsd-sobre-descentralizacao-aprovado-com-criticas-a-esquerda-e-a-direita), projecto de lei aprovado em conjunto no mês de Julho do ano passado.
+
+Outras referências - encontradas pela pesquisa da expressão "atual governo" - são mais duras em relação ao últimos anos de governação. Por exemplo:
+
+> O caso do Novo Aeroporto de Lisboa (NAL) é paradigmático da falta de visão e de capacidade de planeamento do atual governo. 
+
+
+# BE
+
+<center>
+![image](/img/be-graph.jpeg){width=350px}
+</center>
+
+O Bloco de Esquerda tem o programa eleitoral que mais referências faz ao Partido Socialista. Encontramos exemplos de menções a medidas tomadas pelo governo no contexto dos acordos celebrados em conjunto, tais como:
+
+> Os acordos celebrados entre o PS e os partidos de esquerda (...) permitiram recuperar, ainda que com evidentes limites, condições de vida e de mobilização popular.
+
+Por outro lado, não se coibe de fazer duras críticas, como por exemplo:
+
+> PS e a direita uniram-se contra as mudanças de fundo que o país precisava     (...)
+
+> A pobreza energética convive com uma economia de privilégio no setor  (...)  herança da troika que o PS insiste em conservar.
+
+# CDS
+
+<center>
+![image](/img/cds-graph.jpeg){width=350px}
+</center>
+
+Observando o grafo em relação ao CDS, as menções deste partido em relação ao antigo parceiro de coligação PSD são apenas duas e no contexto do trabalho realizado na legislatura anterior. 
+
+> Sem os cortes de 3,4 mil milhões de euros nas rendas do setor elétrico – implementados pelo Governo PSD/CDS - o défice tarifário seria de 6 mil milhões de euros em 2020 e não de cerca 600 milhões.
+
+> Não faz por isso sentido que continuemos a seguir esse modelo, que tem vindo a ser pensado e desenhado e implementado pelos socialistas (…) deixando ao PSD e ao CDS a tarefa de lidar com as crises e a pré-bancarrota. 
+
+
+
+# PCP e Os Verdes 
+
+Por fim, embora o PCP se apresente às eleições em coligação com Os Verdes (CDU), estes não se referenciam mutuamente. Nenhum destes dois partidos faz referência ao Bloco de Esquerda, mas é de notar que mencionam tanto PS, como o CDS e o PSD.
+
+
+_Nota_: Os termos utilizados para identificar as referências, depois da remoção das [_stop words_](https://en.wikipedia.org/wiki/Stop_words) e pontuação, são:
+
+```{r}
+data_frame(Partido = c("PS", "PSD", "CDS", "BE", "PAN", "PCP", "Os Verdes"),
+           Pesquisa = c("'ps', 'partido socialista' e 'atual/actual governo'", "'psd' e 'partido social democrático'", "'cds', 'cds pp' e 'partido centro democrático social'", "'be' e 'bloco esquerda'", "'pan' e 'pessoas animais natureza'", "'pcp', 'partido comunista português' e 'partido comunista'", "'pev' e 'partido ecologista verdes'")) %>% 
+             knitr::kable()
+```
+
+
+

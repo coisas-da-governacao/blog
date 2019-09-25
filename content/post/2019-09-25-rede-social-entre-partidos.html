@@ -1,0 +1,122 @@
+---
+title: 'A rede social dos programas eleitorias'
+author: [Manuela Almeida, Susana Quartin]
+date: '2019-09-25'
+slug: rede-social-partidos
+categories: [legislativas]
+tags: [legislativas, redes sociais]
+---
+
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<link href="/rmarkdown-libs/vis/vis.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/vis/vis.min.js"></script>
+<script src="/rmarkdown-libs/visNetwork-binding/visNetwork.js"></script>
+
+
+<p>Que situações levam um partido a referenciar outro no seu programa eleitoral? Com que frequência isso acontece nos programas para as legislativas que se aproximam? Para tentar responder a estas perguntas, construímos uma rede social em forma de <a href="https://pt.wikipedia.org/wiki/Teoria_dos_grafos">grafo</a>. Mais concretamente, nesta representação:</p>
+<ul>
+<li>Cada nó (ou ponto) representa um diferente partido.</li>
+<li>Cada aresta (ou seta) representa a existência de pelo menos uma referência a outro partido.</li>
+<li>A direcção da seta - por exemplo, BE -&gt; CDS - indica que o programa eleitoral do BE referencia o partido CDS.</li>
+</ul>
+<p>Instruções: o grafo abaixo é interactivo, sendo possível passar o rato sobre as arestas para ver o número de referências, bem como clicar ou arrastar os nós para uma melhor visualização das ligações.</p>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="visNetwork html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"nodes":{"id":["PS","PSD","CDS","BE","PAN","PCP","Os Verdes"],"title":["PS","PSD","CDS","BE","PAN","PCP","Os Verdes"],"label":["PS","PSD","CDS","BE","PAN","PCP","Os Verdes"],"x":[0,1,0.5,-0.5,-1,-0.5,0.499999999999999],"y":[2.22044604925031e-16,2.22044604925031e-16,1,1,2.22044604925031e-16,-0.999999999999999,-1]},"edges":{"from":["PSD","CDS","CDS","BE","BE","BE","BE","PCP","PCP","PCP","Os Verdes","Os Verdes","Os Verdes"],"to":["PS","PS","PSD","PS","PSD","CDS","PCP","PS","PSD","CDS","PS","PSD","CDS"],"weight":[8,5,2,48,15,15,1,23,24,23,1,1,1],"title":["8","5","2","48","15","15","1","23","24","23","1","1","1"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"physics":false,"shape":"dot","size":8,"color":{"background":"#077a71","border":"#013848","highlight":"#e78119","hover":{"background":"#077a71","border":"#013848"}},"shadow":{"enabled":true,"size":10}},"manipulation":{"enabled":false},"edges":{"arrows":"to","color":{"color":"#077a71","highlight":"#d40a47"},"smooth":{"enabled":true},"shadow":false},"physics":{"stabilization":false},"interaction":{"hover":true,"zoomView":false},"layout":{"randomSeed":6}},"groups":null,"width":null,"height":null,"idselection":{"enabled":true,"style":"width: 150px; height: 26px","useLabels":true,"main":"Seleccione o Partido"},"byselection":{"enabled":false,"style":"width: 150px; height: 26px","multiple":false,"hideColor":"rgba(200,200,200,0.5)"},"main":null,"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","igraphlayout":{"type":"square"},"highlight":{"enabled":true,"hoverNearest":true,"degree":0.5,"algorithm":"all","hideColor":"rgba(200,200,200,0.5)","labelOnly":true},"collapse":{"enabled":false,"fit":false,"resetHighlight":true,"clusterOptions":null,"keepCoord":true,"labelSuffix":"(cluster)"},"tooltipStay":300,"tooltipStyle":"position: fixed;visibility:hidden;padding: 5px;white-space: nowrap;font-family: verdana;font-size:14px;font-color:#000000;background-color: #f5f4ed;-moz-border-radius: 3px;-webkit-border-radius: 3px;border-radius: 3px;border: 1px solid #808074;box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);"},"evals":[],"jsHooks":[]}</script>
+<div id="pan" class="section level1">
+<h1>PAN</h1>
+<center>
+<img src="/img/pan-graph.jpeg" title="fig:" width="350" alt="image" />
+</center>
+<p>Com esta visualização, podemos verificar que o PAN é o único partido político cujo programa eleitoral não referencia nem é referenciado por nenhum outro. Assim, o nó que o representa está isolado.</p>
+</div>
+<div id="ps" class="section level1">
+<h1>PS</h1>
+<center>
+<img src="/img/ps-graph.jpeg" title="fig:" width="350" alt="image" />
+</center>
+<p>Em relação ao PS, <em>todos</em> os programas eleitorais (excepto PAN) o referenciam. No sentido oposto, o programa eleitoral do PS não faz qualquer referência a outros partidos.</p>
+</div>
+<div id="psd" class="section level1">
+<h1>PSD</h1>
+<center>
+<img src="/img/psd-graph.jpeg" title="fig:" width="350" alt="image" />
+</center>
+<p>Se olharmos para o PSD, o único partido que o seu programa eleitoral menciona é o PS. Duas destas referências são relativas ao <a href="https://www.jornaldenegocios.pt/economia/autarquias/detalhe/projecto-pspsd-sobre-descentralizacao-aprovado-com-criticas-a-esquerda-e-a-direita">acordo de descentralização</a>, projecto de lei aprovado em conjunto no mês de Julho do ano passado.</p>
+<p>Outras referências - encontradas pela pesquisa da expressão “atual governo” - são mais duras em relação ao últimos anos de governação. Por exemplo:</p>
+<blockquote>
+<p>O caso do Novo Aeroporto de Lisboa (NAL) é paradigmático da falta de visão e de capacidade de planeamento do atual governo.</p>
+</blockquote>
+</div>
+<div id="be" class="section level1">
+<h1>BE</h1>
+<center>
+<img src="/img/be-graph.jpeg" title="fig:" width="350" alt="image" />
+</center>
+<p>O Bloco de Esquerda tem o programa eleitoral que mais referências faz ao Partido Socialista. Encontramos exemplos de menções a medidas tomadas pelo governo no contexto dos acordos celebrados em conjunto, tais como:</p>
+<blockquote>
+<p>Os acordos celebrados entre o PS e os partidos de esquerda (…) permitiram recuperar, ainda que com evidentes limites, condições de vida e de mobilização popular.</p>
+</blockquote>
+<p>Por outro lado, não se coibe de fazer duras críticas, como por exemplo:</p>
+<blockquote>
+<p>PS e a direita uniram-se contra as mudanças de fundo que o país precisava (…)</p>
+</blockquote>
+<blockquote>
+<p>A pobreza energética convive com uma economia de privilégio no setor (…) herança da troika que o PS insiste em conservar.</p>
+</blockquote>
+</div>
+<div id="cds" class="section level1">
+<h1>CDS</h1>
+<center>
+<img src="/img/cds-graph.jpeg" title="fig:" width="350" alt="image" />
+</center>
+<p>Observando o grafo em relação ao CDS, as menções deste partido em relação ao antigo parceiro de coligação PSD são apenas duas e no contexto do trabalho realizado na legislatura anterior.</p>
+<blockquote>
+<p>Sem os cortes de 3,4 mil milhões de euros nas rendas do setor elétrico – implementados pelo Governo PSD/CDS - o défice tarifário seria de 6 mil milhões de euros em 2020 e não de cerca 600 milhões.</p>
+</blockquote>
+<blockquote>
+<p>Não faz por isso sentido que continuemos a seguir esse modelo, que tem vindo a ser pensado e desenhado e implementado pelos socialistas (…) deixando ao PSD e ao CDS a tarefa de lidar com as crises e a pré-bancarrota.</p>
+</blockquote>
+</div>
+<div id="pcp-e-os-verdes" class="section level1">
+<h1>PCP e Os Verdes</h1>
+<p>Por fim, embora o PCP se apresente às eleições em coligação com Os Verdes (CDU), estes não se referenciam mutuamente. Nenhum destes dois partidos faz referência ao Bloco de Esquerda, mas é de notar que mencionam tanto PS, como o CDS e o PSD.</p>
+<p><em>Nota</em>: Os termos utilizados para identificar as referências, depois da remoção das <a href="https://en.wikipedia.org/wiki/Stop_words"><em>stop words</em></a> e pontuação, são:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Partido</th>
+<th align="left">Pesquisa</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">PS</td>
+<td align="left">‘ps’, ‘partido socialista’ e ‘atual/actual governo’</td>
+</tr>
+<tr class="even">
+<td align="left">PSD</td>
+<td align="left">‘psd’ e ‘partido social democrático’</td>
+</tr>
+<tr class="odd">
+<td align="left">CDS</td>
+<td align="left">‘cds’, ‘cds pp’ e ‘partido centro democrático social’</td>
+</tr>
+<tr class="even">
+<td align="left">BE</td>
+<td align="left">‘be’ e ‘bloco esquerda’</td>
+</tr>
+<tr class="odd">
+<td align="left">PAN</td>
+<td align="left">‘pan’ e ‘pessoas animais natureza’</td>
+</tr>
+<tr class="even">
+<td align="left">PCP</td>
+<td align="left">‘pcp’, ‘partido comunista português’ e ‘partido comunista’</td>
+</tr>
+<tr class="odd">
+<td align="left">Os Verdes</td>
+<td align="left">‘pev’ e ‘partido ecologista verdes’</td>
+</tr>
+</tbody>
+</table>
+</div>
