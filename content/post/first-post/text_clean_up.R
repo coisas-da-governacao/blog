@@ -12,6 +12,8 @@ text_clean_up <- function(raw_text) {
 
   raw_text %>%
     stringr::str_to_lower() %>%
+    stringr::str_replace_all(pattern = "-\\s+\\\n", "") %>%
+    stringr::str_replace_all(pattern = "-\\\n", "") %>%
     stringr::str_replace_all(pattern = "\\\n|\\\b", " ") %>%
     stringr::str_replace_all(pattern = "[[:punct:]]", " ") %>%
     stringr::str_replace_all(pattern = "[[:digit:]]+", "") %>%
