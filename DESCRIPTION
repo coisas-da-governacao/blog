@@ -1,0 +1,12 @@
+Package: app
+Imports:
+    rmarkdown,
+    dplyr,
+    blogdown,
+    import,
+    purrr,
+    readr,
+    tidytext,
+    textrank,
+    pdftools,
+    ggplot2
