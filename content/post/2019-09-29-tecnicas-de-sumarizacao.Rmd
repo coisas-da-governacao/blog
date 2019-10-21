@@ -1,0 +1,28 @@
+---
+title: Técnicas de sumarização
+author: Susana Quartin
+date: '2019-09-29'
+slug: tecnicas-de-sumarizacao
+categories:
+  - legislativas
+tags:
+  - legislativas
+---
+
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+load("first-post/programas_df.RData")
+import::from("first-post/text_clean_up.R", text_clean_up)
+library("dplyr")
+```
+
+```{r}
+programas <- mutate(programas_df_renamed, clean_text = text_clean_up(text)) %>% 
+  select(-text) %>% 
+  tidytext::unnest_tokens(sentence, clean_text, token = "sentences") %>%
+  group_by(doc_id) %>% 
+  mutate(sentence_id = row_number()) %>%
+  select(doc_id, sentence_id, sentence)
+```
+
+
