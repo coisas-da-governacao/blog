@@ -1,14 +1,17 @@
 pre_process_sentences <- function(df){
   df %>% 
-    lexRankr::unnest_sentences(output = "sentence", input = "transcription_string") %>% 
+    lexRankr::unnest_sentences(output = "sentence", input = "text") %>% 
     rename(id = sent_id)
 }
 
+stopword_list <- read.table("content/post/meetup/empty.txt")
+
 words_without_stopwords <- function(df_sentences){
   df_sentences %>% 
-    unnest_tokens(output = words,
+    tidytext::unnest_tokens(output = words,
                   input = sentence, 
-                  token = "words") 
+                  token = "words") %>% 
+    anti_join(stopword_list, by = c("words" = "V1")) 
 }
 
 df_count_words_per_sentence <- function(df_words){
@@ -27,10 +30,6 @@ df_count_words <- function(df_words){
 
 
 # Sum basic specific auxiliary functions
-word_prob_vector <- function(df){
-  df %>%
-    mutate(prob_word = count/sum(as.numeric(count)))
-}
 
 sentence_weight_vector <- function(word_prob){
   word_prob %>% 
@@ -52,7 +51,11 @@ update_word_probs <- function(word_prob, chosen_word){
     mutate(prob_word = ifelse(words == unlist(chosen_word$words), prob_word*prob_word, prob_word))
 }
 
+df_verdes <- sentences_manifests %>% filter(id == "verdes") %>% select(text)
+df_psd <- sentences_manifests %>% filter(id == "psd") %>% select(text)
+
 sum_basic_whole_texts <- function(df, n_of_sentences){
+  
   ps <- pre_process_sentences(df)
   
   pps <- words_without_stopwords(ps)
@@ -66,7 +69,7 @@ sum_basic_whole_texts <- function(df, n_of_sentences){
   
   # first step: compute the probability of each word
   word_prob <- word_prob %>%
-    mutate(prob_word = count/sum(as.numeric(count)))
+    mutate(prob_word = count/sum(count_per_sentence))
   
   summary_sentences <- c()
   
@@ -88,7 +91,7 @@ sum_basic_whole_texts <- function(df, n_of_sentences){
     
     # fourth step: update the highest word probability of the previous sentence
     word_prob <- word_prob %>% 
-      mutate(prob_word = ifelse(id == unlist(chosen_sentence$id), prob_word*prob_word, prob_word))
+      mutate(prob_word = ifelse(id == chosen_sentence$id, prob_word*prob_word, prob_word))
   }
   
   ps %>% 
