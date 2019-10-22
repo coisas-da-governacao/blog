@@ -10,6 +10,8 @@ bem
 con
 de
 a
+aaa
++
 além
 âmbito
 ainda
@@ -184,6 +186,18 @@ houverão
 houveria
 houveríamos
 houveriam
+i
+ii
+iii
+iv
+v
+vi
+vii
+viii
+ix
+x
+xi
+xii
 modo
 modos
 sou
