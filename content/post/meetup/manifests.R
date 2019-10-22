@@ -1,4 +1,5 @@
 library("dplyr")
+library("tidytext")
 
 paths <- list.files("content/post/first-post/resources/2019", pattern = ".pdf", full.names = TRUE)
 
@@ -14,31 +15,38 @@ manifests <- function(path) {
                               text,
                               stringr::str_replace_all(string = text, pattern = "\\d+", ".")),
                text = stringr::str_replace_all(text, ":|;", ".")) %>%
-    mutate(id = party) %>%
-    group_by(id) %>% 
-    summarise(text = paste(text, collapse = " "))
+        filter(nchar(text) > 1) %>%
+        filter(stringr::str_detect(text, pattern = "\\d{1}", negate = TRUE)) %>% 
+        mutate(party = party) %>%
+        group_by(id) %>% 
+        summarise(text = paste(text, collapse = " "))
     }) %>% 
-    group_by(id) %>% 
+    group_by(party) %>% 
     summarise(text = paste(text, collapse = ".")) %>% 
     mutate(text = stringr::str_squish(text),
+           text = stringr::str_replace_all(text, " i+ ", "."), 
            text = stringr::str_replace_all(text, stringr::fixed(" ."), "."),
-           text = stringr::str_replace_all(text, "\\.+", ". "),
-           text = stringr::str_replace_all(text, stringr::fixed(";"), "."))
+           text = stringr::str_replace_all(text, stringr::fixed(";"), "."),
+           text = stringr::str_replace_all(text, 
+                                          pattern =  paste0(c("1.", "2.", "3.", "4.", "5.", "6.", "7.", "8.", "9.", "10."), 
+                                                            collapse = "|"), "."),
+           text = stringr::str_replace_all(text, "\\.+", ". "))
 }
 
 manifests_texts <- paths %>% purrr::map_df(manifests) %>% 
-  filter(id != "pdr")
+  filter(party != "pdr")
 
 sentences_manifests <- tidytext::unnest_tokens(manifests_texts, 
                                                output = "sentences", 
                                                input = "text", 
                                                token = "sentences") %>% 
   filter(stringr::str_count(sentences, " ") > 5) %>% 
-  mutate(sentences = stringr::str_remove_all(sentences, "programa eleitoral do pan legislativas."),
-         sentences = stringr::str_remove_all(sentences, "programa eleitoral do bloco de esquerda."), 
-         sentences = stringr::str_remove_all(sentences, "eleições legislativas"), 
-         sentences = stringr::str_remove_all(sentences, "eleições legislativas"), 
-         sentences = stringr::str_remove_all(sentences, "programa político chega.")) %>% 
-  group_by(id) %>% 
-  summarize(text = paste(sentences, collapse = " "))
-
+  filter(!sentences %in% c("programa eleitoral do pan legislativas.",
+                           "programa eleitoral do bloco de esquerda.",
+                           "eleições legislativas.",
+                           "programa eleitoral do pcp.",
+                           "legislativas.",
+                           "programa às eleições legislativas.",
+                           "partido nacional renovador.",
+                           "programa político chega.")) %>% 
+  rename(sentence = sentences)
