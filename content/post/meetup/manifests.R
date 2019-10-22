@@ -18,7 +18,7 @@ manifests <- function(path) {
         filter(nchar(text) > 1) %>%
         filter(stringr::str_detect(text, pattern = "\\d{1}", negate = TRUE)) %>% 
         mutate(party = party) %>%
-        group_by(id) %>% 
+        group_by(party) %>% 
         summarise(text = paste(text, collapse = " "))
     }) %>% 
     group_by(party) %>% 
@@ -34,19 +34,5 @@ manifests <- function(path) {
 }
 
 manifests_texts <- paths %>% purrr::map_df(manifests) %>% 
-  filter(party != "pdr")
-
-sentences_manifests <- tidytext::unnest_tokens(manifests_texts, 
-                                               output = "sentences", 
-                                               input = "text", 
-                                               token = "sentences") %>% 
-  filter(stringr::str_count(sentences, " ") > 5) %>% 
-  filter(!sentences %in% c("programa eleitoral do pan legislativas.",
-                           "programa eleitoral do bloco de esquerda.",
-                           "eleições legislativas.",
-                           "programa eleitoral do pcp.",
-                           "legislativas.",
-                           "programa às eleições legislativas.",
-                           "partido nacional renovador.",
-                           "programa político chega.")) %>% 
-  rename(sentence = sentences)
+  filter(party != "pdr") %>% 
+  mutate(text = tolower(text))

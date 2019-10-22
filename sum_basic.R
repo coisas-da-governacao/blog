@@ -1,10 +1,20 @@
 #'
 #' @return 
 #'   `tibble(id: chr, sentence: chr)`
-#pre_process_sentences <- function(df){
-#  df %>% 
-#    tidytext::unnest_tokens(output = sentence, input = text, token = "sentences") 
-#}
+pre_process_sentences <- function(df){
+  df %>% 
+    lexRankr::unnest_sentences(output = "sentence", input = "text", doc_id = "party") %>% 
+    filter(stringr::str_count(sentence, " ") > 5) %>% 
+    filter(!sentence %in% c("programa eleitoral do pan legislativas.",
+                             "programa eleitoral do bloco de esquerda.",
+                             "eleições legislativas.",
+                             "programa eleitoral do pcp.",
+                             "legislativas.",
+                             "programa às eleições legislativas.",
+                             "partido nacional renovador.",
+                             "programa político chega.")) %>% 
+    rename(id = sent_id)
+}
 
 #'
 #' @return 
@@ -68,9 +78,7 @@ update_word_probs <- function(word_prob, chosen_word){
 
 sum_basic_whole_texts <- function(df, n_of_sentences, original = TRUE){
   
-  #ps <- pre_process_sentences(df)
-  ps <- df %>% group_by(party) %>% 
-    mutate(id = row_number())
+  ps <- pre_process_sentences(df)
   
   pps <- words_without_stopwords(ps)
   
@@ -104,7 +112,8 @@ sum_basic_whole_texts <- function(df, n_of_sentences, original = TRUE){
         select(id)
     } else {
       sentences_weights %>% 
-        top_n(n = 1, wt = weight_sentence) %>% 
+        top_n(n = 1, wt = weight_sentence) %>%
+        head(1) %>% 
         select(id)
     }
     
