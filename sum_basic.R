@@ -1,6 +1,6 @@
 #'
 #' @return 
-#'   `tibble(id: chr, sentence: chr)`
+#'   `tibble(party: chr, id: chr, sentence: chr)`
 pre_process_sentences <- function(df){
   df %>% 
     lexRankr::unnest_sentences(output = "sentence", input = "text", doc_id = "party") %>% 
@@ -13,6 +13,14 @@ pre_process_sentences <- function(df){
                              "programa às eleições legislativas.",
                              "partido nacional renovador.",
                              "programa político chega.")) %>% 
+    mutate(sentence = gsub(x = sentence, pattern = paste0(c("programa eleitoral do pan legislativas",
+                            "programa eleitoral do bloco de esquerda",
+                            "eleições legislativas",
+                            "programa eleitoral do pcp",
+                            "legislativas",
+                            "programa às eleições legislativas",
+                            "partido nacional renovador.",
+                            "programa político chega"), collapse = "|"), replacement = "")) %>% 
     rename(id = sent_id)
 }
 

@@ -10,7 +10,10 @@ manifests <- function(path) {
   pages_data %>% 
     purrr::map_df(.f = ~ {
       .x %>% 
-        mutate(text = stringr::str_replace_all(string = text, pattern = "\b|-|\\{|–", replacement = "")) %>% 
+        filter(!(nchar(text) == 2 && strsplit(text, "")[[1]][2] == ".")) %>% 
+        filter(text != "Fonte:") %>% 
+        filter(!grepl(x = text, pattern = "m() ?)€")) %>% 
+        mutate(text = stringr::str_replace_all(string = text, pattern = "\b|-|\\{|–|\\(|\\)|\\*", replacement = "")) %>% 
         mutate(text = if_else(space, 
                               text,
                               stringr::str_replace_all(string = text, pattern = "\\d+", ".")),
